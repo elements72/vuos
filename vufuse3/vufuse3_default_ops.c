@@ -62,7 +62,7 @@ static int vustd_symlink (const char *path, const char *newpath)
 
 static int vustd_rename (const char *path, const char *newpath, unsigned int flags)
 {
-    /*added unsigned int flags*/
+    /* added unsigned int flags */
 	printkdebug(F,"DEFAULT rename %s\n", path);
 	return -ENOSYS;
 }
@@ -76,7 +76,7 @@ static int vustd_link (const char *path, const char *newpath)
 
 static int vustd_chmod (const char *path, mode_t mode, struct fuse_file_info *fi)
 {
-    /*Added struct fuse_file_info *fi*/
+    /* Added struct fuse_file_info *fi */
 	printkdebug(F,"DEFAULT chmod %s\n", path);
 	return -ENOSYS;
 }
@@ -97,7 +97,7 @@ static int vustd_truncate (const char *path, off_t off, struct fuse_file_info *f
 
 static int vustd_utime (const char *path, struct utimbuf *timbuf)
 {
-    /* unchanged */
+    /* unchanged / deprecated */
 	printkdebug(F,"DEFAULT utime %s\n", path);
 	return -ENOSYS;
 }
