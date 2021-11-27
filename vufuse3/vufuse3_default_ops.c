@@ -20,11 +20,6 @@ static int vustd_readlink (const char *path, char *link, size_t size)
 	return -EINVAL;
 }
 
-static int vustd_getdir ()
-{
-    /*Deprecated*/
-}
-
 static int vustd_mknod (const char *path, mode_t mode, dev_t dev)
 {
     /* unchanged */
@@ -92,13 +87,6 @@ static int vustd_truncate (const char *path, off_t off, struct fuse_file_info *f
 {
     /*Added struct fuse_file_info *fi*/
 	printkdebug(F,"DEFAULT truncat %s\n", path);
-	return -ENOSYS;
-}
-
-static int vustd_utime (const char *path, struct utimbuf *timbuf)
-{
-    /* unchanged / deprecated */
-	printkdebug(F,"DEFAULT utime %s\n", path);
 	return -ENOSYS;
 }
 
@@ -226,16 +214,6 @@ static int vustd_create (const char *path, mode_t mode, struct fuse_file_info *f
 	return -ENOSYS;
 }
 
-static int vustd_ftruncate (const char *path, off_t length, struct fuse_file_info *fileinfo)
-{
-	/* obsolete and removed */
-}
-
-static int vustd_fgetattr (const char *path, struct stat *buf, struct fuse_file_info *fileinfo)
-{
-	/* obsolete and removed */
-}
-
 static int vustd_lock (const char *path, struct fuse_file_info *fileinfo, int cmd, struct flock *fl)
 {
     /* unchanged */
@@ -260,7 +238,6 @@ static int vustd_bmap (const char *path, size_t blocksize, uint64_t *idx)
 struct fuse_operations vufuse_default_ops = {
 	.getattr = vustd_getattr,
 	.readlink = vustd_readlink,
-	.getdir = vustd_getdir,
 	.mknod = vustd_mknod,
 	.mkdir = vustd_mkdir,
 	.unlink = vustd_unlink,
@@ -271,7 +248,6 @@ struct fuse_operations vufuse_default_ops = {
 	.chmod = vustd_chmod,
 	.chown = vustd_chown,
 	.truncate = vustd_truncate,
-	.utime = vustd_utime,
 	.open = vustd_open,
 	.read = vustd_read,
 	.write = vustd_write,
@@ -292,8 +268,6 @@ struct fuse_operations vufuse_default_ops = {
 
 	.access = vustd_access,
 	.create = vustd_create,
-	.ftruncate = vustd_ftruncate,
-	.fgetattr = vustd_fgetattr,
 	.lock = vustd_lock,
 	.utimens = vustd_utimens,
 	.bmap = vustd_bmap,
