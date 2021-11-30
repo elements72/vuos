@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef VUFUSE_DEFAULT_OPS_H
-#define VUFUSE_DEFAULT_OPS_H
+#ifndef VUFUSE3_DEFAULT_OPS_H
+#define VUFUSE3_DEFAULT_OPS_H
 
 #include <fuse3/fuse.h>
 

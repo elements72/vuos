@@ -2,7 +2,7 @@
 #define VUFUSE3_STARTMAIN_H
 
 //TODO: verify if other params are needed
-struct main_params_3 {
+struct main_params {
   int (*pmain)(int argc, char **argv);
   const char *filesystemtype;
   const char *source;
@@ -12,6 +12,6 @@ struct main_params_3 {
   char *opts;
 };
 
-int fuse3startmain(struct main_params *mntp);
+int fusestartmain(struct main_params *mntp);
 
 #endif

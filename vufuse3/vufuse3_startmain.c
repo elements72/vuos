@@ -39,7 +39,7 @@ static void addflagoptions(char **tags, char **args, unsigned long mountflags) {
   args[flagoptc] = NULL;
 }
 
-int fuse3startmain(struct main_params_3 *mntp) {
+int fusestartmain(struct main_params *mntp) {
 	int tagc = stropt(mntp->opts, NULL, NULL, 0) - 1;
 	int flagtagc =  countflagoptions(*mntp->pmountflags & FUSE_MOUNTFLAGS);
 	char buf[strlen(mntp->opts)+1];
