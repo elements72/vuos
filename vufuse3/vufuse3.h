@@ -27,7 +27,7 @@ struct fuse {
 	void *private_data;
 };
 
-struct fileinfo {
+struct fileinfo {	//struttura per ogni file aperto
 	//char *path;
 	struct fuse_node *node;
 	off_t pos;        /* file offset */

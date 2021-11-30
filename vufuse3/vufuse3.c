@@ -169,7 +169,7 @@ int vu_vufuse_mount(const char *source, const char *target,
 			struct fuse_conn_info conn;
 			struct fuse_context fcx, *ofcx;
 			ofcx = fuse_push_context (&fcx);
-            struct fuse_config *cfg;                                //TODO: fuse_new to initialize
+            struct fuse_config *cfg = fuse_new;                                 //TODO: fuse_new to initialize
 			new_fuse->private_data=new_fuse->fops.init(&conn, cfg);   
 			fuse_pop_context(ofcx);
 		}
@@ -329,7 +329,7 @@ static void fopsmerge (const struct fuse_operations *fops, const struct fuse_ope
 struct fuse *fuse_new(struct fuse_chan *ch, struct fuse_args *args,
 		const struct fuse_operations *op, size_t op_size,
 		void *user_data)
-{
+{		// vuget
 	struct fuse *fuse = (struct fuse *)ch;
 	if (op_size != sizeof(struct fuse_operations))
 		printk(KERN_ERR "Fuse module vs vufuse support version mismatch");

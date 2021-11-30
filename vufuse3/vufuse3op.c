@@ -665,10 +665,11 @@ static int vufuse_common_filldir(FILE *f, const char *name, unsigned char type, 
 		.d_ino = ino == 0 ? (ino_t) -1 : ino,
 		.d_type = type,
 		.d_off = ftello(f),
+		//i campi non nominati sono 0
 	};
 	static char filler[7];
 	unsigned short int namelen = strlen(name) + 1;
-	unsigned short int reclen  = offsetof(struct dirent64, d_name) + namelen;
+	unsigned short int reclen  = offsetof(struct dirent64, d_name) + namelen; //posizione (offset) in byte del campo assegnato nella struttura
 	int ret_value;
 	snprintf(entry.d_name, 256, "%s", name);
 	/* entries are always 8 bytes aligned */
