@@ -6,7 +6,7 @@
 #include <stropt.h>
 #include <execs.h>
 #include <vumodule.h>
-//#include <vufuse.h>    //New vufuse3 file needed
+#include <vufuse3.h>
 #include <vufuse3_startmain.h>
 
 //TODO: verify and modify

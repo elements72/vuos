@@ -12,7 +12,7 @@
 #include <vufuse3.h>
 
 // TODO: verify functions definition in vumodule.h
-VU_PROTOTYPES(vufuse)
+VU_PROTOTYPES(vufuse3)
 
 #define FILEPATH(x) vufuse_node_path(x->node)
 
@@ -36,7 +36,7 @@ static off_t vufuse_get_filesize(char *pathname) {
 	return (rv >= 0) ? buf.st_size : 0;
 }
 
-int vu_vufuse_lstat(char *pathname, struct vu_stat *buf, int flags, int sfd, void *private) {
+int vu_vufuse3_lstat(char *pathname, struct vu_stat *buf, int flags, int sfd, void *private) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -63,7 +63,7 @@ int vu_vufuse_lstat(char *pathname, struct vu_stat *buf, int flags, int sfd, voi
 	return rv;
 }
 
-int vu_vufuse_access(char *path, int mode, int flags) {
+int vu_vufuse3_access(char *path, int mode, int flags) {
 	int rv = 0;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -90,7 +90,7 @@ int vu_vufuse_access(char *path, int mode, int flags) {
 		return rv;
 }
 
-ssize_t vu_vufuse_readlink(char *path, char *buf, size_t bufsiz) {
+ssize_t vu_vufuse3_readlink(char *path, char *buf, size_t bufsiz) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -113,7 +113,7 @@ ssize_t vu_vufuse_readlink(char *path, char *buf, size_t bufsiz) {
 }
 
 #define FUSE_SUPER_MAGIC 0x65735546
-int vu_vufuse_statfs (const char *pathname, struct statfs *buf, int fd, void *fdprivate) {
+int vu_vufuse3_statfs (const char *pathname, struct statfs *buf, int fd, void *fdprivate) {
 	struct fuse_context fc, *ofc;
 	int rv;
 	struct statvfs svfs;
@@ -142,7 +142,7 @@ int vu_vufuse_statfs (const char *pathname, struct statfs *buf, int fd, void *fd
 	}
 }
 
-int vu_vufuse_mkdir (const char *pathname, mode_t mode) {
+int vu_vufuse3_mkdir (const char *pathname, mode_t mode) {
 	int rv = 0;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -166,7 +166,7 @@ int vu_vufuse_mkdir (const char *pathname, mode_t mode) {
 		return rv;
 }
 
-int vu_vufuse_mknod (const char *pathname, mode_t mode, dev_t dev)
+int vu_vufuse3_mknod (const char *pathname, mode_t mode, dev_t dev)
 {
 	int rv;
 	struct fuse_context fc, *ofc;
@@ -201,7 +201,7 @@ int vu_vufuse_mknod (const char *pathname, mode_t mode, dev_t dev)
 		return rv;
 }
 
-int vu_vufuse_rmdir(const char *pathname) {
+int vu_vufuse3_rmdir(const char *pathname) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -226,7 +226,7 @@ int vu_vufuse_rmdir(const char *pathname) {
 }
 
 
-int vu_vufuse_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate) {
+int vu_vufuse3_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -250,7 +250,7 @@ int vu_vufuse_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate)
 		return rv;
 }
 
-int vu_vufuse_lchown (const char *pathname, uid_t owner, gid_t group,int fd, void *fdprivate) {
+int vu_vufuse3_lchown (const char *pathname, uid_t owner, gid_t group,int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -274,7 +274,7 @@ int vu_vufuse_lchown (const char *pathname, uid_t owner, gid_t group,int fd, voi
 		return rv;
 }
 
-int vu_vufuse_symlink (const char *target, const char *linkpath) {
+int vu_vufuse3_symlink (const char *target, const char *linkpath) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -298,7 +298,7 @@ int vu_vufuse_symlink (const char *target, const char *linkpath) {
 		return rv;
 }
 
-int vu_vufuse_truncate(const char *path, off_t length, int fd, void *fdprivate) {
+int vu_vufuse3_truncate(const char *path, off_t length, int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -323,7 +323,7 @@ int vu_vufuse_truncate(const char *path, off_t length, int fd, void *fdprivate) 
 		return rv;
 }
 
-int vu_vufuse_link (const char *target, const char *linkpath) {
+int vu_vufuse3_link (const char *target, const char *linkpath) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
@@ -347,7 +347,7 @@ int vu_vufuse_link (const char *target, const char *linkpath) {
 		return rv;
 }
 
-int vu_vufuse_open(const char *pathname, int flags, mode_t mode, void **private) {
+int vu_vufuse3_open(const char *pathname, int flags, mode_t mode, void **private) {
 	int rv;
 	int exists_err;
 	struct fileinfo *ft;
@@ -465,7 +465,7 @@ int vu_vufuse_open(const char *pathname, int flags, mode_t mode, void **private)
 	}
 }
 
-int vu_vufuse_close(int fd, void *fdprivate) {
+int vu_vufuse3_close(int fd, void *fdprivate) {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -511,7 +511,7 @@ int vu_vufuse_close(int fd, void *fdprivate) {
 	}
 }
 
-off_t vu_vufuse_lseek(int fd, off_t offset, int whence, void *fdprivate)
+off_t vu_vufuse3_lseek(int fd, off_t offset, int whence, void *fdprivate)
 {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
@@ -537,7 +537,7 @@ off_t vu_vufuse_lseek(int fd, off_t offset, int whence, void *fdprivate)
 	}
 }
 
-ssize_t vu_vufuse_read (int fd, void *buf, size_t count, void *fdprivate) {
+ssize_t vu_vufuse3_read (int fd, void *buf, size_t count, void *fdprivate) {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -567,7 +567,7 @@ ssize_t vu_vufuse_read (int fd, void *buf, size_t count, void *fdprivate) {
 	}
 }
 
-ssize_t vu_vufuse_pread64 (int fd, void *buf, size_t count, off_t offset, int flags, void *fdprivate) {
+ssize_t vu_vufuse3_pread64 (int fd, void *buf, size_t count, off_t offset, int flags, void *fdprivate) {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -596,7 +596,7 @@ ssize_t vu_vufuse_pread64 (int fd, void *buf, size_t count, off_t offset, int fl
 	}
 }
 
-ssize_t vu_vufuse_write(int fd, const void *buf, size_t count, void *fdprivate) {
+ssize_t vu_vufuse3_write(int fd, const void *buf, size_t count, void *fdprivate) {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -630,7 +630,7 @@ ssize_t vu_vufuse_write(int fd, const void *buf, size_t count, void *fdprivate) 
 	}
 }
 
-ssize_t vu_vufuse_pwrite64(int fd, const void *buf, size_t count, off_t offset, int flags, void *fdprivate) {
+ssize_t vu_vufuse3_pwrite64(int fd, const void *buf, size_t count, off_t offset, int flags, void *fdprivate) {
 	if (fd < 0 || fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -705,7 +705,7 @@ static int vufusefilldir(fuse_dirh_t h, const char *name, int type, ino_t ino) {
 	return vufuse_common_filldir(h->f, name, type, ino);
 }*/
 
-int vu_vufuse_getdents64(unsigned int fd, struct dirent64 *dirp, unsigned int count, void *fdprivate) {
+int vu_vufuse3_getdents64(unsigned int fd, struct dirent64 *dirp, unsigned int count, void *fdprivate) {
 	if (fdprivate == NULL) {
 		errno = EBADF;
 		return -1;
@@ -773,7 +773,7 @@ int vu_vufuse_getdents64(unsigned int fd, struct dirent64 *dirp, unsigned int co
 	}
 }
 
-int vu_vufuse_unlink (const char *pathname) {
+int vu_vufuse3_unlink (const char *pathname) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	struct vu_stat buf;
@@ -817,7 +817,7 @@ int vu_vufuse_unlink (const char *pathname) {
 		return rv;
 }
 
-int vu_vufuse_rename (const char *target, const char *linkpath, int flags) {
+int vu_vufuse3_rename (const char *target, const char *linkpath, int flags) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);

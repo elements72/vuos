@@ -33,7 +33,7 @@
 #include <vufuse3_startmain.h>
 #include <vufuse3_default_ops.h>
 
-VU_PROTOTYPES(vufuse)
+VU_PROTOTYPES(vufuse3)
 
 	struct vu_module_t vu_module = {
 		.name = "vufuse",
@@ -91,7 +91,7 @@ static int secondary_reentrancy_test(void *handle) {
 	return 0;
 }
 
-int vu_vufuse_mount(const char *source, const char *target,
+int vu_vufuse3_mount(const char *source, const char *target,
 		const char *filesystemtype, unsigned long mountflags,
 		const void *data) {
 	void *dlhandle;
@@ -169,7 +169,7 @@ int vu_vufuse_mount(const char *source, const char *target,
 			struct fuse_conn_info conn;
 			struct fuse_context fcx, *ofcx;
 			ofcx = fuse_push_context (&fcx);
-            struct fuse_config *cfg = fuse_new;                                 //TODO: fuse_new to initialize
+            struct fuse_config *cfg = fuse_new;	//TODO: fuse_new to initialize
 			new_fuse->private_data=new_fuse->fops.init(&conn, cfg);   
 			fuse_pop_context(ofcx);
 		}
@@ -217,7 +217,7 @@ static void vufuse_umount_internal(struct fuse *fuse) {
 	free(fuse);
 }
 
-int vu_vufuse_umount2(const char *target, int flags) {
+int vu_vufuse3_umount2(const char *target, int flags) {
 	struct fuse *fuse = vu_get_ht_private_data();
 
 	if (fuse == NULL) {
@@ -243,7 +243,7 @@ int vu_vufuse_umount2(const char *target, int flags) {
 	}
 }
 
-void vu_vufuse_cleanup(uint8_t type, void *arg, int arglen,struct vuht_entry_t *ht) {
+void vu_vufuse3_cleanup(uint8_t type, void *arg, int arglen,struct vuht_entry_t *ht) {
 	if (type == CHECKPATH) {
 		struct fuse *fuse = vuht_get_private_data(ht);
 		if (fuse == NULL) {
@@ -384,8 +384,8 @@ void fuse_exit(struct fuse *f)
 	 */
 
 }
-
-int fuse_loop_mt(struct fuse *f)
+// TODO - Added clone_fd parameter
+int fuse_loop_mt(struct fuse *f, int clone_fd)
 {
 	//in fuselib is FUSE event loop with multiple threads,
 	//but hereeverything has multiple threads ;-)
