@@ -276,7 +276,8 @@ void fuse_pop_context(struct fuse_context *old) {
 /*******************************************************************************************/
 /* fuse related functions*/
 
-int fuse_version(void) { return VUFUSE_FUSE_VERSION;}
+//TODO: verify if required
+//int fuse_version(void) { return VUFUSE_FUSE_VERSION;}
 
 struct fuse_context *fuse_get_context(void)
 {

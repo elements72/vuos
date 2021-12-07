@@ -19,7 +19,7 @@
  */
 
 // TODO: verify version
-#define FUSE_USE_VERSION 29
+// #define FUSE_USE_VERSION 29
 
 #include <stdio.h>
 #include <stdlib.h>
