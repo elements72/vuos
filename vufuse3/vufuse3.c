@@ -36,8 +36,8 @@
 VU_PROTOTYPES(vufuse3)
 
 	struct vu_module_t vu_module = {
-		.name = "vufuse",
-		.description = "vu virtual file systems (user level FUSE)"
+		.name = "vufuse3",
+		.description = "vu virtual file systems (user level FUSE3)"
 	};
 
 /* values for INUSE and thread synchro */
