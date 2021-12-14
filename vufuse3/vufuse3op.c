@@ -858,8 +858,7 @@ int vu_vufuse3_rename (const char *target, const char *linkpath, int flags) {
 	} else
 		return rv;
 }
-
-/*   
+   
 int vu_vufuse_utimensat(int dirfd, const char *pathname,
 		const struct timespec times[2], int flags, int fd, void *private) {
 	int rv;
@@ -872,12 +871,7 @@ int vu_vufuse_utimensat(int dirfd, const char *pathname,
   }
   pthread_mutex_lock(&(fc.fuse->mutex));
 
-	rv = fc.fuse->fops.utimens(pathname, times);
-	if (rv == -ENOSYS) {
-		struct utimbuf utimes = {times[0].tv_sec, times[1].tv_sec}; 
-		rv = fc.fuse->fops.utime(pathname, &utimes);                    TODO: utime has been removed
-	}
-
+	rv = fc.fuse->fops.utimens(pathname, times, NULL);
   fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
 
@@ -888,4 +882,4 @@ int vu_vufuse_utimensat(int dirfd, const char *pathname,
     return -1;
   } else
     return rv;
-}*/
+}

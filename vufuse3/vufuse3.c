@@ -169,8 +169,9 @@ int vu_vufuse3_mount(const char *source, const char *target,
 			struct fuse_conn_info conn;
 			struct fuse_context fcx, *ofcx;
 			ofcx = fuse_push_context (&fcx);
-            struct fuse_config *cfg = fuse_new;	//TODO: fuse_new to initialize
-			new_fuse->private_data=new_fuse->fops.init(&conn, cfg);   
+            struct fuse_config cfg;			// TODO: initialize in a better way
+			memset(&cfg, 0, sizeof(cfg));
+			new_fuse->private_data=new_fuse->fops.init(&conn, &cfg);   
 			fuse_pop_context(ofcx);
 		}
 
@@ -288,10 +289,9 @@ int fuse_main_real(int argc, char *argv[], const struct fuse_operations *op,
 		size_t op_size, void *user_data)
 {
 	struct fuse *f;
-	struct fuse_chan *fusechan = fuse_mount(NULL, NULL); /*options have been already parsed*/
-	if (fusechan != NULL) {
-		f = fuse_new(fusechan, NULL, op, op_size, user_data);
-
+	int res = fuse_mount(NULL, NULL); /*options have been already parsed*/
+	if (res != -1) {
+		f = fuse_new(NULL, op, op_size, user_data);
 		return fuse_loop(f);
 	} else
 		return -1;
@@ -299,12 +299,13 @@ int fuse_main_real(int argc, char *argv[], const struct fuse_operations *op,
 
 /* fuse_mount and fuse_unmount are dummy functions,
  * the real mount operation has been done in vufuse_mount */
-struct fuse_chan *fuse_mount(const char *mountpoint, struct fuse_args *args)
+int fuse_mount(struct fuse *f, const char *mountpoint)
 {
-	return vu_get_ht_private_data();
+	// return vu_get_ht_private_data();
+	return 0;	// TODO what values return?
 }
 
-void fuse_unmount(const char *mountpoint, struct fuse_chan *ch)
+void fuse_unmount(struct fuse* f)
 {
 	return;
 }
@@ -327,11 +328,11 @@ static void fopsmerge (const struct fuse_operations *fops, const struct fuse_ope
 	}
 }
 
-struct fuse *fuse_new(struct fuse_chan *ch, struct fuse_args *args,
+struct fuse *fuse_new(struct fuse_args *args,
 		const struct fuse_operations *op, size_t op_size,
 		void *user_data)
 {		// vuget
-	struct fuse *fuse = (struct fuse *)ch;
+	struct fuse *fuse = vu_get_ht_private_data(); // hardcoded
 	if (op_size != sizeof(struct fuse_operations))
 		printk(KERN_ERR "Fuse module vs vufuse support version mismatch");
 	if (fuse != vu_get_ht_private_data() || op_size != sizeof(struct fuse_operations)){

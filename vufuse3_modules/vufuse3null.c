@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 //TODO: which version?
-//#define FUSE_USE_VERSION 29
+#define FUSE_USE_VERSION 30
 
 #include <stdio.h>
 #include <stdlib.h>
