@@ -428,10 +428,10 @@ int fuse_chan_fd(struct fuse_chan *ch) {
 /* constructor / destructor */
 __attribute__((constructor))
 	static void init(void) {
-		debug_set_name(F, "VUFUSE");
+		debug_set_name(Z, "VUFUSE3");
 	}
 
 __attribute__((destructor))
 	static void fini(void) {
-		debug_set_name(F, "");
+		debug_set_name(Z, "");
 	}

@@ -859,7 +859,7 @@ int vu_vufuse3_rename (const char *target, const char *linkpath, int flags) {
 		return rv;
 }
    
-int vu_vufuse_utimensat(int dirfd, const char *pathname,
+int vu_vufuse3_utimensat(int dirfd, const char *pathname,
 		const struct timespec times[2], int flags, int fd, void *private) {
 	int rv;
   struct fuse_context fc, *ofc;
