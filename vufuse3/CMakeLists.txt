@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 
-#TODO: which fuse version in params?  
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=30")
+
+
+execute_process(COMMAND bash "-c" "gcc -Wall ${CMAKE_CURRENT_SOURCE_DIR}/fuse_version.c `pkg-config fuse3 --cflags --libs` -o fuse_version && ./fuse_version" OUTPUT_VARIABLE FUSE_VERSION)
+
+message(${FUSE_VERSION})
+# TODO: which fuse version in params?  
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=31")
 
 include_directories(${VU_HEADERS} ${CMAKE_CURRENT_SOURCE_DIR})
 

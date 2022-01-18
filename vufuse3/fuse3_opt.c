@@ -6,7 +6,6 @@
   See the file COPYING.LIB
 */
 
-// TODO - analizzare questo file e controllare eventuali differenze 
 
 #include <fuse3/fuse_opt.h>
 

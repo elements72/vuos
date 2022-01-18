@@ -117,7 +117,7 @@ static int vustd_write (const char *path, const char *buf, size_t size, off_t of
  * The 'f_frsize', 'f_favail', 'f_fsid' and 'f_flag' fields are ignored
  *
  */
-#if ( FUSE_MINOR_VERSION >= 5 )
+#if ( FUSE_MINOR_VERSION >= 2 )
 static int vustd_statfs (const char *path, struct statvfs *stat)
 #else
 static int vustd_statfs (const char *path, struct statfs *stat)

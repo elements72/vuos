@@ -277,8 +277,7 @@ void fuse_pop_context(struct fuse_context *old) {
 /*******************************************************************************************/
 /* fuse related functions*/
 
-//TODO: verify if required
-//int fuse_version(void) { return VUFUSE_FUSE_VERSION;}
+// int fuse_version(void) { return VUFUSE_FUSE_VERSION;}
 
 struct fuse_context *fuse_get_context(void)
 {
@@ -374,6 +373,7 @@ int fuse_loop(struct fuse *f)
 		//pthread_mutex_unlock( &f->endmutex );
 		pthread_mutex_unlock( &condition_mutex );
 	}
+	printf("In fuse_loop");
 	return 0;
 }
 
@@ -387,12 +387,21 @@ void fuse_exit(struct fuse *f)
 
 }
 // TODO - Added clone_fd parameter
+#if FUSE_USE_VERSION < 32
 int fuse_loop_mt(struct fuse *f, int clone_fd)
 {
 	//in fuselib is FUSE event loop with multiple threads,
 	//but hereeverything has multiple threads ;-)
 	return fuse_loop(f);
 }
+#else
+int fuse_loop_mt(struct fuse *f, struct fuse_loop_config *config)
+{
+	//in fuselib is FUSE event loop with multiple threads,
+	//but hereeverything has multiple threads ;-)
+	return fuse_loop(f);
+}
+#endif
 
 /* other dummy functions. useless for vufuse */
 struct fuse_session *fuse_get_session(struct fuse *f) {

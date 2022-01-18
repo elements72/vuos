@@ -9,7 +9,6 @@
 #include <vufuse3.h>
 #include <vufuse3_startmain.h>
 
-//TODO: verify and modify
 
 #define FUSE_MOUNTFLAGS (MS_RDONLY | MS_NOSUID | MS_NODEV | MS_NOEXEC | MS_SYNCHRONOUS | MS_REMOUNT | \
 		MS_MANDLOCK | MS_DIRSYNC | MS_NOATIME | MS_NODIRATIME | MS_POSIXACL | MS_RELATIME | MS_STRICTATIME | \

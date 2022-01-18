@@ -11,7 +11,6 @@
 #include <vufuse_node.h>
 #include <vufuse3.h>
 
-// TODO: verify functions definition in vumodule.h
 VU_PROTOTYPES(vufuse3)
 
 #define FILEPATH(x) vufuse_node_path(x->node)
@@ -29,16 +28,19 @@ static inline unsigned long hash_inodeno (const char *s) {
 /* (vufuse_get_filesize callers need to hold the mutex */
 static off_t vufuse_get_filesize(char *pathname) {
 	struct fuse *fuse = vu_get_ht_private_data();
+	struct fileinfo *ft = (struct fileinfo *) fuse->private_data;
 	struct vu_stat buf;
 	int rv;
 	memset(&buf, 0, sizeof(struct vu_stat));
-	rv	= fuse->fops.getattr(pathname, &buf, NULL);         //TODO: modify NULL value
+	rv	= fuse->fops.getattr(pathname, &buf, &ft->ffi); // TODO: private_data is right
 	return (rv >= 0) ? buf.st_size : 0;
 }
 
 int vu_vufuse3_lstat(char *pathname, struct vu_stat *buf, int flags, int sfd, void *private) {
 	int rv;
 	struct fuse_context fc, *ofc;
+	struct fileinfo *ft = (struct fileinfo *)private;
+
 	ofc = fuse_push_context(&fc);
 	pthread_mutex_lock(&(fc.fuse->mutex));
 
@@ -66,14 +68,16 @@ int vu_vufuse3_lstat(char *pathname, struct vu_stat *buf, int flags, int sfd, vo
 int vu_vufuse3_access(char *path, int mode, int flags) {
 	int rv = 0;
 	struct fuse_context fc, *ofc;
+
 	ofc = fuse_push_context(&fc);
 	pthread_mutex_lock(&(fc.fuse->mutex));
 
+	struct fileinfo *ft = (struct fileinfo *) fc.private_data; // TODO - correct initialization?
 	/* "default permission" management */
 	rv = fc.fuse->fops.access(path, mode);
 	if (rv == -ENOSYS) {
 		struct vu_stat buf;
-		rv = fc.fuse->fops.getattr(path, &buf, NULL);     //TODO: modify NULL value
+		rv = fc.fuse->fops.getattr(path, &buf, &ft->ffi); //TODO: is this correct?
 	}
 	fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
@@ -229,6 +233,7 @@ int vu_vufuse3_rmdir(const char *pathname) {
 int vu_vufuse3_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
+	struct fileinfo *ft = (struct fileinfo *) fdprivate;
 	ofc = fuse_push_context(&fc);
 
 	if (fc.fuse->mountflags & MS_RDONLY) {
@@ -238,7 +243,7 @@ int vu_vufuse3_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate
 	}
 
 	pthread_mutex_lock(&(fc.fuse->mutex));
-	rv = fc.fuse->fops.chmod(pathname, mode, NULL);           //TODO: modify NULL value
+	rv = fc.fuse->fops.chmod(pathname, mode, &ft->ffi); // TODO is correct?
 	fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
 
@@ -253,6 +258,8 @@ int vu_vufuse3_chmod (const char *pathname, mode_t mode, int fd, void *fdprivate
 int vu_vufuse3_lchown (const char *pathname, uid_t owner, gid_t group,int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
+	struct fileinfo *ft = (struct fileinfo *)fdprivate;
+
 	ofc = fuse_push_context(&fc);
 
 	if (fc.fuse->mountflags & MS_RDONLY) {
@@ -262,7 +269,7 @@ int vu_vufuse3_lchown (const char *pathname, uid_t owner, gid_t group,int fd, vo
 	}
 
 	pthread_mutex_lock(&(fc.fuse->mutex));
-	rv = fc.fuse->fops.chown(pathname, owner, group, NULL);         //TODO: modify NULL value
+	rv = fc.fuse->fops.chown(pathname, owner, group, &ft->ffi); //TODO: is correct
 	fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
 
@@ -301,6 +308,7 @@ int vu_vufuse3_symlink (const char *target, const char *linkpath) {
 int vu_vufuse3_truncate(const char *path, off_t length, int fd, void *fdprivate) {
 	int rv;
 	struct fuse_context fc, *ofc;
+	struct fileinfo *ft = (struct fileinfo *) fdprivate;
 	ofc = fuse_push_context(&fc);
 
 	if (fc.fuse->mountflags & MS_RDONLY) {
@@ -310,7 +318,7 @@ int vu_vufuse3_truncate(const char *path, off_t length, int fd, void *fdprivate)
 	}
 
 	pthread_mutex_lock(&(fc.fuse->mutex));
-	rv = fc.fuse->fops.truncate(path, length, NULL);        //TODO: modify NULL value
+	rv = fc.fuse->fops.truncate(path, length, &ft->ffi); // TODO: is correct?
 	fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
 
@@ -357,7 +365,7 @@ int vu_vufuse3_open(const char *pathname, int flags, mode_t mode, void **private
 	ofc = fuse_push_context(&fc);
 	pthread_mutex_lock(&(fc.fuse->mutex));
 
-	exists_err = fc.fuse->fops.getattr(pathname, &buf, NULL); /* if 0 the file already exists.*/ //TODO: modify NULL value
+	exists_err = fc.fuse->fops.getattr(pathname, &buf, NULL); /* if 0 the file already exists.*/
 
 	if ((flags & O_ACCMODE) != O_RDONLY && fc.fuse->mountflags & MS_RDONLY) {
 		fuse_pop_context(ofc);
@@ -388,7 +396,7 @@ int vu_vufuse3_open(const char *pathname, int flags, mode_t mode, void **private
 		}
 
 		if ((flags & O_TRUNC) && (flags & O_ACCMODE)!= O_RDONLY) {
-			rv = fc.fuse->fops.truncate(pathname, 0, NULL);             //TODO: modify NULL value
+			rv = fc.fuse->fops.truncate(pathname, 0, NULL); // TODO: is correct
 
 			printkdebug(F,"TRUNCATE path:%s flags:%x retvalue:%d",pathname,flags,rv);
 			if (rv < 0) {
@@ -459,7 +467,7 @@ int vu_vufuse3_open(const char *pathname, int flags, mode_t mode, void **private
 	} else {
 		ft->node = vufuse_node_add(fc.fuse, pathname);
 		fc.fuse->inuse++;
-		*private = ft;
+		*private = ft; // TODO here is saved ft
 		/*file related function will check sfd >= 0 before accessing fdprivate. That sfd will have the value of rv, so returning 0 is ok*/
 		return rv;
 	}
@@ -682,7 +690,7 @@ static int vufuse_common_filldir(FILE *f, const char *name, unsigned char type, 
 }
 
 /* Function to add an entry in a readdir() operation */
-static int vufusefillreaddir(void *buf, const char *name, const struct stat *stbuf, off_t off, enum fuse_fill_dir_flags flags) {    //TODO: verify exra param and its utility
+static int vufusefillreaddir(void *buf, const char *name, const struct stat *stbuf, off_t off, enum fuse_fill_dir_flags flags) {    //TODO: verify extra param and its utility
 	FILE *f = buf;
 	__ino64_t d_ino;
 	unsigned char d_type;
@@ -728,7 +736,7 @@ int vu_vufuse3_getdents64(unsigned int fd, struct dirent64 *dirp, unsigned int c
 				struct fuse_dirhandle dh = {.f = ft->dirf};
 				rv = fc.fuse->fops.getdir(FILEPATH(ft), &dh, vufusefilldir);
 			}*/
-            rv = fc.fuse->fops.readdir(FILEPATH(ft), ft->dirf, vufusefillreaddir, 0, &ft->ffi, 0);
+            rv = fc.fuse->fops.readdir(FILEPATH(ft), ft->dirf, vufusefillreaddir, 0, &ft->ffi, 0); // TODO initialize fuse_fill_dir_flags
 			fuse_pop_context(ofc);
 			pthread_mutex_unlock(&(fc.fuse->mutex));
 			if (rv < 0) {
@@ -777,8 +785,10 @@ int vu_vufuse3_unlink (const char *pathname) {
 	int rv;
 	struct fuse_context fc, *ofc;
 	struct vu_stat buf;
+
 	ofc = fuse_push_context(&fc);
 	char *hiddenpath = NULL;
+	struct fileinfo *ft = (struct fileinfo *) fc.private_data;
 
 	if (fc.fuse->mountflags & MS_RDONLY) {
 		fuse_pop_context(ofc);
@@ -787,7 +797,7 @@ int vu_vufuse3_unlink (const char *pathname) {
 	}
 
 	pthread_mutex_lock(&(fc.fuse->mutex));
-	if (fc.fuse->fops.getattr(pathname, &buf, NULL) < 0) {   //TODO: modify NULL value
+	if (fc.fuse->fops.getattr(pathname, &buf, &ft->ffi) < 0) {   //TODO: modify NULL value
 		pthread_mutex_unlock(&(fc.fuse->mutex));
 		fuse_pop_context(ofc);
 		errno = ENOENT;
@@ -795,7 +805,7 @@ int vu_vufuse3_unlink (const char *pathname) {
 	}
 
 	if (fc.fuse->fuseflags & FUSE_HARDREMOVE || (hiddenpath = vufuse_node_rename(fc.fuse, pathname, NULL)) == NULL ||
-			(rv = fc.fuse->fops.rename(pathname,hiddenpath, 0)) < 0) {      //TODO: modify zero value
+			(rv = fc.fuse->fops.rename(pathname,hiddenpath, 0)) < 0) {
 		if (hiddenpath)
 			vufuse_node_rename(fc.fuse, hiddenpath, pathname);
 
@@ -831,20 +841,20 @@ int vu_vufuse3_rename (const char *target, const char *linkpath, int flags) {
 
 	pthread_mutex_lock(&(fc.fuse->mutex));
 	if (fc.fuse->fuseflags & FUSE_HARDREMOVE || (hiddenpath = vufuse_node_rename(fc.fuse, linkpath, NULL)) == NULL ||
-			fc.fuse->fops.rename(linkpath,hiddenpath, 0) < 0) {         //TODO: modify zero value
+			fc.fuse->fops.rename(linkpath,hiddenpath, flags) < 0) {
 		if (hiddenpath) {
 			vufuse_node_rename(fc.fuse, hiddenpath, linkpath);
 			hiddenpath = NULL;
 		}
 	}
 
-	rv = fc.fuse->fops.rename(target,linkpath, 0);              //TODO: modify zero value
+	rv = fc.fuse->fops.rename(target,linkpath, flags);
 
 	if (rv >= 0)
 		vufuse_node_rename(fc.fuse, target, linkpath);
 	else if (hiddenpath) {
 		// revert the renaming to hiddenpath
-		if (fc.fuse->fops.rename(hiddenpath, linkpath, 0) >= 0)     //TODO: modify zero value
+		if (fc.fuse->fops.rename(hiddenpath, linkpath, flags) >= 0)
 			vufuse_node_rename(fc.fuse, hiddenpath, linkpath);
 	}
 	pthread_mutex_unlock(&(fc.fuse->mutex));
@@ -862,7 +872,8 @@ int vu_vufuse3_rename (const char *target, const char *linkpath, int flags) {
 int vu_vufuse3_utimensat(int dirfd, const char *pathname,
 		const struct timespec times[2], int flags, int fd, void *private) {
 	int rv;
-  struct fuse_context fc, *ofc;
+	struct fileinfo *ft = (struct fileinfo *) private;
+	struct fuse_context fc, *ofc;
 	ofc = fuse_push_context(&fc);
 	if (fc.fuse->mountflags & MS_RDONLY) {
     fuse_pop_context(ofc);
@@ -871,7 +882,7 @@ int vu_vufuse3_utimensat(int dirfd, const char *pathname,
   }
   pthread_mutex_lock(&(fc.fuse->mutex));
 
-	rv = fc.fuse->fops.utimens(pathname, times, NULL);
+	rv = fc.fuse->fops.utimens(pathname, times, &ft->ffi);
   fuse_pop_context(ofc);
 	pthread_mutex_unlock(&(fc.fuse->mutex));
 
