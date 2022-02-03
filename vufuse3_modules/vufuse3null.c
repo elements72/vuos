@@ -17,7 +17,7 @@
  * distribution in the file COPYING); if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
-//TODO: which version?
+
 #define FUSE_USE_VERSION 30
 
 #include <stdio.h>
@@ -45,7 +45,7 @@
 
 int fuse_reentrant_tag = 0;
 
-int op_getattr(const char *path, struct stat *stbuf)
+int op_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi)
 {
     if (strcmp(path, "/") == 0)
     {
@@ -57,11 +57,10 @@ int op_getattr(const char *path, struct stat *stbuf)
     else
         return -ENOENT;
 }
-int op_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi)
+int op_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags)
 {
-    enum fuse_fill_dir_flags flags = FUSE_FILL_DIR_PLUS; // TODO - Filler function takes an addition flags enum parameter
-    filler(buf, ".", NULL, 0, flags);
-    filler(buf, "..", NULL, 0, flags);
+    filler(buf, ".", NULL, 0, 0);
+    filler(buf, "..", NULL, 0, 0);
     return 0;
 }
 

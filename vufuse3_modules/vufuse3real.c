@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
-// TODO: verify version
 #define FUSE_USE_VERSION 30
 
 #include <stdio.h>
@@ -141,8 +140,8 @@ int op_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset
 		struct stat stbuf ;
 		char filename[PATH_MAX];
 		sprintf( filename , "%s%s",(strcmp(path,"/")) ? path : "",de->d_name);
-        enum fuse_fill_dir_flags flags = FUSE_FILL_DIR_PLUS; // TODO - Filler function takes an addition flags enum parameter
-        //ignoring offset                                    // in fuse_fill_dir_flags the only possible values is FUSE_FILL_DIR_PLUS
+        enum fuse_fill_dir_flags flags = FUSE_FILL_DIR_PLUS;
+        //ignoring offset
         if (lstat(filename, &stbuf) >=  0){
 			filler(buf,de->d_name,&stbuf,0,flags);
 

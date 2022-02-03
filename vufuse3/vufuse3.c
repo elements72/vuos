@@ -169,14 +169,14 @@ int vu_vufuse3_mount(const char *source, const char *target,
 			struct fuse_conn_info conn;
 			struct fuse_context fcx, *ofcx;
 			ofcx = fuse_push_context (&fcx);
-            struct fuse_config cfg;			// TODO: initialize in a better way
+            struct fuse_config cfg;
 			memset(&cfg, 0, sizeof(cfg));
 			new_fuse->private_data=new_fuse->fops.init(&conn, &cfg);   
 			fuse_pop_context(ofcx);
 		}
 
 		pthread_mutex_unlock(&(new_fuse->mutex));
-		printkdebug(F, "MOUNT source:%s target:%s filesystemtype:%s mountflags:%x data:%s",
+		printkdebug(Z, "MOUNT source:%s target:%s filesystemtype:%s mountflags:%x data:%s",
 				source,target,filesystemtype,mountflags, (data!=NULL)?data:"<NULL>");
 
 		return 0;
@@ -238,7 +238,7 @@ int vu_vufuse3_umount2(const char *target, int flags) {
 				retval = -1;
 			}
 			pthread_mutex_unlock(&(fuse->mutex));
-			printkdebug(F,"UMOUNT target:%s flags:%d retval = %d",target,flags,retval);
+			printkdebug(Z,"UMOUNT target:%s flags:%d retval = %d",target,flags,retval);
 			return retval;
 		}
 	}
@@ -300,8 +300,7 @@ int fuse_main_real(int argc, char *argv[], const struct fuse_operations *op,
  * the real mount operation has been done in vufuse_mount */
 int fuse_mount(struct fuse *f, const char *mountpoint)
 {
-	// return vu_get_ht_private_data();
-	return 0;	// TODO what values return?
+	return 0;
 }
 
 void fuse_unmount(struct fuse* f)
@@ -386,7 +385,7 @@ void fuse_exit(struct fuse *f)
 	 */
 
 }
-// TODO - Added clone_fd parameter
+
 #if FUSE_USE_VERSION < 32
 int fuse_loop_mt(struct fuse *f, int clone_fd)
 {
