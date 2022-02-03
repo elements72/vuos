@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <linux_32_64.h>
 #include <vu_file_table.h>
 #include <hashtable.h>
 #include <syscall_defs.h>
@@ -41,9 +42,9 @@ static int copyfile_in(struct vuht_entry_t *ht, char *path, char *tmp_path) {
 	size_t filesize = 0;
   char *buf[BUFSIZ];
   void *private;
-	struct stat fdoutstat;
+	struct vu_stat fdoutstat;
 	//printk("COPY %s to %s\n",path,tmp_path);
-  fdout = r_open(tmp_path, O_WRONLY | O_CREAT, 0700);
+  fdout = r_open(tmp_path, O_WRONLY | O_CREAT | O_CLOEXEC, 0700);
   if (fdout < 0)
     return -1;
 	if (r_fstat(fdout, &fdoutstat) < 0) {
@@ -57,10 +58,20 @@ static int copyfile_in(struct vuht_entry_t *ht, char *path, char *tmp_path) {
 			r_close(fdout);
 			return -1;
 		}
-		while ((n = service_syscall(ht, __VU_read)(fdin, buf, BUFSIZ, private)) > 0) {
-			ssize_t writeout = r_write(fdout, buf, n);
-			if (writeout > 0)
-				filesize += writeout;
+		if (service_getflags(ht) & VU_USE_PRW) {
+			off_t pos = 0;
+			while ((n = service_syscall(ht, __VU_pread64)(fdin, buf, BUFSIZ, pos, 0, private)) > 0) {
+				ssize_t writeout = r_write(fdout, buf, n);
+				if (writeout > 0)
+					filesize += writeout;
+				pos += n;
+			}
+		} else {
+			while ((n = service_syscall(ht, __VU_read)(fdin, buf, BUFSIZ, private)) > 0) {
+				ssize_t writeout = r_write(fdout, buf, n);
+				if (writeout > 0)
+					filesize += writeout;
+			}
 		}
 		service_syscall(ht, __VU_close)(fdin, private);
 		r_ftruncate(fdout, filesize);
@@ -82,8 +93,16 @@ static int copyfile_out(struct vuht_entry_t *ht, char *path, char *tmp_path) {
 		close(fdin);
 		return -1;
 	}
-	while ((n = r_read(fdin, buf, BUFSIZ)) > 0)
-		service_syscall(ht, __VU_write)(fdout, buf, n, private);
+	if (service_getflags(ht) & VU_USE_PRW) {
+		off_t pos = 0;
+		while ((n = r_read(fdin, buf, BUFSIZ)) > 0) {
+			service_syscall(ht, __VU_pwrite64)(fdout, buf, n, pos, private);
+			pos += n;
+		}
+	} else {
+		while ((n = r_read(fdin, buf, BUFSIZ)) > 0)
+			service_syscall(ht, __VU_write)(fdout, buf, n, private);
+	}
 	service_syscall(ht, __VU_close)(fdout, private);
 	r_close(fdin);
 	return 0;

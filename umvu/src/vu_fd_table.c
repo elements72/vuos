@@ -234,8 +234,8 @@ int vu_fd_close(int fd, int nested) {
 void vu_fd_dup(int fd, int nested, int oldfd, int fdflags) {
 	struct vu_fd_table_t *fd_table = VU_FD_TABLE(nested);
   fatal(fd_table);
-  pthread_rwlock_wrlock(&fd_table->lock);
 	if (fd >= 0) {
+		pthread_rwlock_wrlock(&fd_table->lock);
 		vu_fd_table_resize(fd_table, fd);
 		if (fd_table->fnode[fd] != NULL)
 			vu_fnode_close(fd_table->fnode[fd]);
@@ -366,6 +366,26 @@ int vu_fd_get_sfd(int fd, void **pprivate, int nested) {
 	ret_value = fnode ? vu_fnode_get_sfd(fnode, pprivate) : -1;
 	pthread_rwlock_unlock(&fd_table->lock);
 	return ret_value;
+}
+
+void vu_fd_get_possize_lock(int fd, int nested, off_t *pos, off_t *size) {
+	struct vu_fd_table_t *fd_table = VU_FD_TABLE(nested);
+  struct vu_fnode_t *fnode;
+  pthread_rwlock_rdlock(&fd_table->lock);
+  fnode = get_fnode_nolock(fd_table, fd);
+	if (fnode)
+		vu_fnode_get_possize_lock(fnode, pos, size);
+  pthread_rwlock_unlock(&fd_table->lock);
+}
+
+void vu_fd_set_possize_unlock(int fd, int nested, off_t pos, off_t size) {
+	struct vu_fd_table_t *fd_table = VU_FD_TABLE(nested);
+  struct vu_fnode_t *fnode;
+  pthread_rwlock_rdlock(&fd_table->lock);
+  fnode = get_fnode_nolock(fd_table, fd);
+	if (fnode)
+		vu_fnode_set_possize_unlock(fnode, pos, size);
+  pthread_rwlock_unlock(&fd_table->lock);
 }
 
 static void *vu_fd_tracer_upcall(inheritance_state_t state, void *arg) {

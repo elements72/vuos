@@ -33,9 +33,32 @@ struct vu_service_t;
 struct vuht_entry_t;
 
 struct vu_module_t {
-  char *name;
-  char *description;
+       char *name;
+       char *description;
+       uint64_t flags;
+       uint64_t filler;
 };
+
+/* flags:
+ *      + VU_USE_PRW: use pread/pwrite instead of read/write. vuos core keeps track of the file
+ *        current offset and current size.
+ *        The module read/write methods are not used (can be omitted except for char devices)
+ *        The 'seek' method can be safely omitted. When defined it confirms the consistency of the
+ *           file position (e.g. for seekable devices max size)
+ *
+ *           off_t modulename_lseek(int fd, off_t offset, int whence, void *fdprivate) {
+ *             ...
+ *             switch (whence) {
+ *               case SEEK_SET: if (offset <= device_size)
+ *                                return offset;
+ *                              else
+ *                                return errno = EINVAL, -1;
+ *               case SEEK_END: return device_size;
+ *               default:       return errno = EINVAL, -1;
+ *             }
+ *           }
+ */
+#define VU_USE_PRW	      (1L << 0)
 
 typedef unsigned long int syscall_arg_t;
 typedef long (*syscall_t)();
@@ -184,6 +207,9 @@ void vu_mod_poke_data(void *addr, void *buf, size_t datalen);
 
 mode_t vu_mod_getumask(void);
 mode_t vu_mod_getmode(void);
+
+int vu_mod_fd_get_sfd(int fd, void **fdprivate);
+struct vuht_entry_t *vu_mod_fd_get_ht(int fd);
 
 struct vu_service_t *vuht_get_service(struct vuht_entry_t *hte);
 __attribute__((always_inline))

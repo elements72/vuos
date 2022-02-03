@@ -34,6 +34,7 @@
 #include <hashtable.h>
 #include <arch_table.h>
 #include <vu_fd_table.h>
+#include <vu_file_table.h>
 #include <vu_fs.h>
 #include <syscall_defs.h>
 #include <vu_execute.h>
@@ -87,6 +88,12 @@ void wi_lstat(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 			sd->ret_value = -errno;
 			return;
 		}
+		/* update st_size of currently open files */
+		if (S_ISREG(statbuf->st_mode) && (service_getflags(ht) & VU_USE_PRW)) {
+				off_t opensize = vu_fnode_getset_size(ht, statbuf, -1);
+				if (opensize >= 0)
+					statbuf->st_size = opensize;
+		}
 		/* store results */
 		vu_poke_arg(bufaddr, statbuf, sizeof(*statbuf), nested);
 		sd->ret_value = ret_value;
@@ -134,7 +141,7 @@ void wi_readlink(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 	}
 }
 
-/* access, faccessat */
+/* access, faccessat, faccessat2 */
 void wi_access(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 	if (ht) {
 		/* standard args */
@@ -142,8 +149,6 @@ void wi_access(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 		int ret_value;
 		/* args */
 		int mode;
-		/* flag = 0. faccessat syscall has three args.
-			 left here hoping that a future syscall will be POSIX 2008 compliant */
 		int flags = 0;
 		/* local bufs */
 		/* fetch args */
@@ -154,6 +159,12 @@ void wi_access(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 			case __NR_faccessat:
 				mode = sd->syscall_args[2];
 				break;
+#ifdef __NR_faccessat2
+			case __NR_faccessat2:
+				mode = sd->syscall_args[2];
+				flags = sd->syscall_args[3];
+				break;
+#endif
 		}
 		/* call */
 		sd->action = SKIPIT;
@@ -239,6 +250,10 @@ void wi_truncate(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd) {
 			sd->ret_value = -errno;
 			return;
 		}
+		struct vu_stat *stat = &sd->extra->statbuf;
+		/* update the size of open files */
+		if (S_ISREG(stat->st_mode) && (service_getflags(ht) & VU_USE_PRW))
+			vu_fnode_getset_size(ht, stat, length);
 		sd->ret_value = ret_value;
 	}
 }

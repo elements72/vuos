@@ -60,7 +60,7 @@ static __thread struct vu_fnode_t *tmp_fnode;
  * the following function rewrites the path of the execve system call */
 static void rewrite_execve_filename(struct vuht_entry_t *ht, struct syscall_descriptor_t *sd, char *path, struct vu_stat *statbuf) {
 	char *tmp_path;
-	tmp_fnode = vu_fnode_create(ht, path, statbuf, 0, -1, NULL);
+	tmp_fnode = vu_fnode_create(ht, path, statbuf, 0, -1, VU_FNODE_CLOSED);
 	tmp_path = vu_fnode_get_vpath(tmp_fnode);
 	vu_fnode_copyin(tmp_fnode);
 	rewrite_syspath(sd, tmp_path);
@@ -76,7 +76,10 @@ static int read_exec_header(struct vuht_entry_t *ht, struct binfmt_req_t *req) {
 		fd = service_syscall(ht, __VU_open)(vuht_path2mpath(ht, req->path), O_RDONLY, 0, &private);
 		if (fd < 0)
 			return -errno;
-		ret_value = service_syscall(ht, __VU_read)(fd, req->filehead, BINFMTBUFLEN, private);
+		if (service_getflags(ht) & VU_USE_PRW)
+			ret_value = service_syscall(ht, __VU_pread64)(fd, req->filehead, BINFMTBUFLEN, 0, 0, private);
+		else
+			ret_value = service_syscall(ht, __VU_read)(fd, req->filehead, BINFMTBUFLEN, private);
 		service_syscall(ht, __VU_close)(fd, private);
 	} else {
 		fd = r_open(req->path, O_RDONLY);
